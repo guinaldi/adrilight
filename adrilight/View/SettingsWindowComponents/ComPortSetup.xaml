@@ -13,12 +13,12 @@
              xmlns:local="clr-namespace:adrilight.View.SettingsWindowComponents"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:validationRules="clr-namespace:adrilight.ViewModel.ValidationRules"
-             mc:Ignorable="d" 
-             d:DesignHeight="391.45" d:DesignWidth="991.636">
+             xmlns:wpfx="http://schemas.xceed.com/wpf/xaml/toolkit"
+             mc:Ignorable="d" d:DesignWidth="991.636" Height="673.964">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="booleanToVisibilityConverter" />
     </UserControl.Resources>
-    <WrapPanel>
+    <WrapPanel Margin="0,0,0,1">
         <materialDesign:Card Margin="4 4 4 4" Width="300">
             <Grid>
                 <Grid.RowDefinitions>
@@ -30,7 +30,7 @@
                 <materialDesign:PackIcon Kind="Settings" Margin="0 8 0 0" Width="132" Height="132"
                                          VerticalAlignment="Center"
                                          HorizontalAlignment="Center"/>
-                
+
                 <StackPanel Grid.Row="1" Margin="8 24 8 8" >
                     <TextBlock FontWeight="Bold">COM Port</TextBlock>
                     <ComboBox
@@ -39,7 +39,7 @@
                         <ComboBox.SelectedValue>
                             <Binding Path="Settings.ComPort" UpdateSourceTrigger="PropertyChanged">
                                 <Binding.ValidationRules>
-                                    <validationRules:NotEmptyValidationRule ValidatesOnTargetUpdated="True"/>
+                                    <validationRules:NotEmptyValidationRule/>
                                 </Binding.ValidationRules>
                             </Binding>
                         </ComboBox.SelectedValue>
@@ -98,7 +98,7 @@
                 <materialDesign:PackIcon Kind="PlayPause" Margin="0 8 0 0" Width="132" Height="132"
                                          VerticalAlignment="Center"
                                          HorizontalAlignment="Center"/>
-                
+
                 <StackPanel Grid.Row="1" Margin="8 24 8 8">
                     <DockPanel>
                         <ToggleButton DockPanel.Dock="Right" IsEnabled="{Binding TransferCanBeStarted}"
@@ -116,5 +116,36 @@
                 </StackPanel>
             </Grid>
         </materialDesign:Card>
+        <materialDesign:Card Margin="4 0 4 4" Width="300">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <materialDesign:PackIcon Kind="Paint" Margin="0 8 0 0" Width="132" Height="132"
+                                         VerticalAlignment="Center"
+                                         HorizontalAlignment="Center"/>
+
+                <StackPanel Grid.Row="1" Margin="8 24 8 8">
+                    <DockPanel>
+                        <ToggleButton DockPanel.Dock="Right"
+                        Style="{StaticResource MaterialDesignSwitchAccentToggleButton}" VerticalAlignment="Center" Margin="8 0 0 0"
+                          ToolTip="Send Unique Color" IsChecked="{Binding Settings.UniqueColor}" />
+                        <TextBlock FontWeight="Bold">Send Unique Colors</TextBlock>
+                    </DockPanel>
+                    <TextBlock TextWrapping="Wrap" Margin="0 8 0 0" TextAlignment="Justify">
+                        This switch sends an unique color. Select the color by clicking box.
+                    </TextBlock>
+                    <wpfx:ColorPicker Name="ColorPicker1" Height="30" DisplayColorAndName="True" 
+                   Margin="0,20,0,0" />
+
+                </StackPanel>
+
+
+            </Grid>
+        </materialDesign:Card>
+
     </WrapPanel>
 </UserControl>

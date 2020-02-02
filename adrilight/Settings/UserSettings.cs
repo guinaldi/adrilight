@@ -8,6 +8,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace adrilight
 {
@@ -43,6 +44,9 @@ namespace adrilight
         private int _limitFps = 60;
         private int _configFileVersion = 2;
         private AlternateWhiteBalanceModeEnum _alternateWhiteBalanceMode = AlternateWhiteBalanceModeEnum.Off;
+
+        private bool _uniqueColor = false;
+        private Color _color = Color.FromRgb(0,0,0);
 
         //support future config file migration
         public int ConfigFileVersion { get => _configFileVersion; set { Set(() => ConfigFileVersion, ref _configFileVersion, value); } }
@@ -80,6 +84,9 @@ namespace adrilight
         public byte AltWhitebalanceBlue { get => _altWhitebalanceBlue; set { Set(() => AltWhitebalanceBlue, ref _altWhitebalanceBlue, value); } }
 
         public bool SendRandomColors { get => _sendRandomColors; set { Set(() => SendRandomColors, ref _sendRandomColors, value); } }
+
+        public bool UniqueColor { get => _uniqueColor; set { Set(() => UniqueColor, ref _uniqueColor, value); } }
+        public Color Color { get => _color; set { Set(() => Color, ref _color, value); } }
 
         public Guid InstallationId { get; set; } = Guid.NewGuid();
         public AlternateWhiteBalanceModeEnum AlternateWhiteBalanceMode { get => _alternateWhiteBalanceMode; set { Set(() => AlternateWhiteBalanceMode, ref _alternateWhiteBalanceMode, value); } }

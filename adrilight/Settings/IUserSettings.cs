@@ -1,6 +1,7 @@
 ﻿using adrilight.Settings;
 using System;
 using System.ComponentModel;
+using System.Windows.Media;
 
 namespace adrilight
 {
@@ -35,6 +36,10 @@ namespace adrilight
         byte AltWhitebalanceRed { get; set; }
         byte AltWhitebalanceGreen { get; set; }
         byte AltWhitebalanceBlue { get; set; }
+
+        bool UniqueColor { get; set; }
+        Color Color { get; set; }
+
 
         bool SendRandomColors { get; set; }
 

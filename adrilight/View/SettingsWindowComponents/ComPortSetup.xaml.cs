@@ -26,6 +26,8 @@ namespace adrilight.View.SettingsWindowComponents
             InitializeComponent();
         }
 
+        public SettingsViewModel SettingsViewModel { get; }
+
 
 
         public class ComPortSetupSelectableViewPart : ISelectableViewPart
@@ -42,6 +44,20 @@ namespace adrilight.View.SettingsWindowComponents
             public string ViewPartName => "Serial Communication Setup";
 
             public object Content { get => lazyContent.Value; }
+        }
+
+
+        private void ColorPicker1_SelectedColorChanged(object sender,
+            RoutedPropertyChangedEventArgs<Color> e)
+
+        {
+            if (ColorPicker1.SelectedColor.HasValue)
+            {
+                SettingsViewModel.Settings.Color = ColorPicker1.SelectedColor.Value;
+
+            }
+
+
         }
     }
 }

@@ -128,6 +128,12 @@ namespace adrilight
                     outputStream = _messageRainbow;
                     bufferLength = _messageRainbow.Length;
                 }
+                else if (UserSettings.UniqueColor)
+                {
+                    byte[] sendColor = { (byte)UserSettings.Color.B, (byte)UserSettings.Color.G, (byte)UserSettings.Color.R };
+                    outputStream = sendColor;
+                    bufferLength = sendColor.Length;
+                }
                 else
                 {
                     bufferLength = _messagePreamble.Length

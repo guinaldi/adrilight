@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using adrilight.Settings;
 
 namespace adrilight.Fakes
@@ -47,6 +48,8 @@ namespace adrilight.Fakes
         public string AdrilightVersion { get; set; } = "2.0.6";
 
         public AlternateWhiteBalanceModeEnum AlternateWhiteBalanceMode { get; set; } = AlternateWhiteBalanceModeEnum.Off;
+        public bool UniqueColor { get; set; } = false;
+        public Color Color { get; set; } = Color.FromRgb(0,0,0);
 #pragma warning disable CS0067
         public event PropertyChangedEventHandler PropertyChanged;
 #pragma warning restore CS0067
