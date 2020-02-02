@@ -1,14 +1,14 @@
-﻿using System;
+﻿using adrilight.Util;
+using Newtonsoft.Json;
+using NLog;
+using System;
+using System.Buffers;
 using System.Diagnostics;
 using System.IO.Ports;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using NLog;
-using System.Buffers;
 using System.Windows.Media;
-using adrilight.Util;
-using System.Linq;
-using Newtonsoft.Json;
 
 namespace adrilight
 {
@@ -69,7 +69,8 @@ namespace adrilight
             }
         }
 
-        private readonly byte[] _messagePreamble = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09};
+        private readonly byte[] _messagePreamble = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 };
+        private readonly byte[] _messageRainbow = { 24, 24, 24, 24, 24, 24, 24, 24, 24, 24 };
         private readonly byte[] _messagePostamble = { 85, 204, 165 };
 
 
@@ -86,8 +87,7 @@ namespace adrilight
             if (_workerThread != null) return;
 
             _cancellationTokenSource = new CancellationTokenSource();
-            _workerThread = new Thread(DoWork)
-            {
+            _workerThread = new Thread(DoWork) {
                 Name = "Serial sending",
                 IsBackground = true
             };
@@ -118,41 +118,51 @@ namespace adrilight
             lock (SpotSet.Lock)
             {
                 const int colorsPerLed = 3;
-                int bufferLength = _messagePreamble.Length
+                int bufferLength = 0;
+
+
+
+
+                if (UserSettings.SendRandomColors)
+                {
+                    outputStream = _messageRainbow;
+                    bufferLength = _messageRainbow.Length;
+                }
+                else
+                {
+                    bufferLength = _messagePreamble.Length
                     + (SpotSet.Spots.Length * colorsPerLed)
                     + _messagePostamble.Length;
 
-
-                outputStream = ArrayPool<byte>.Shared.Rent(bufferLength);
-
-                Buffer.BlockCopy(_messagePreamble, 0, outputStream, 0, _messagePreamble.Length);
-                Buffer.BlockCopy(_messagePostamble, 0, outputStream, bufferLength - _messagePostamble.Length, _messagePostamble.Length);
-
-                var allBlack = true;
-                foreach (Spot spot in SpotSet.Spots)
-                {
-                    if (!UserSettings.SendRandomColors)
+                    outputStream = ArrayPool<byte>.Shared.Rent(bufferLength);
+                    Buffer.BlockCopy(_messagePreamble, 0, outputStream, 0, _messagePreamble.Length);
+                    Buffer.BlockCopy(_messagePostamble, 0, outputStream, bufferLength - _messagePostamble.Length, _messagePostamble.Length);
+                    var allBlack = true;
+                    foreach (Spot spot in SpotSet.Spots)
                     {
-                        outputStream[counter++] = spot.Blue; // blue
-                        outputStream[counter++] = spot.Green; // green
-                        outputStream[counter++] = spot.Red; // red
+                        if (!UserSettings.SendRandomColors)
+                        {
+                            outputStream[counter++] = spot.Blue; // blue
+                            outputStream[counter++] = spot.Green; // green
+                            outputStream[counter++] = spot.Red; // red
 
-                        allBlack = allBlack && spot.Red == 0 && spot.Green == 0 && spot.Blue == 0;
+                            allBlack = allBlack && spot.Red == 0 && spot.Green == 0 && spot.Blue == 0;
+                        }
+                        //else
+                        //{
+                        //    allBlack = false;
+                        //    var n = frameCounter % 360;
+                        //    var c = ColorUtil.FromAhsb(255, n, 1, 0.5f);
+                        //    outputStream[counter++] = c.B; // blue
+                        //    outputStream[counter++] = c.G; // green
+                        //    outputStream[counter++] = c.R; // red
+                        //}
                     }
-                    else
+
+                    if (allBlack)
                     {
-                        allBlack = false;
-                        var n = frameCounter % 360;
-                        var c = ColorUtil.FromAhsb(255, n, 1, 0.5f);
-                        outputStream[counter++] = c.B; // blue
-                        outputStream[counter++] = c.G; // green
-                        outputStream[counter++] = c.R; // red
+                        blackFrameCounter++;
                     }
-                }
-
-                if (allBlack)
-                {
-                    blackFrameCounter++;
                 }
 
                 return (outputStream, bufferLength);
@@ -161,7 +171,7 @@ namespace adrilight
 
         private void DoWork(object tokenObject)
         {
-            var cancellationToken = (CancellationToken) tokenObject;
+            var cancellationToken = (CancellationToken)tokenObject;
             ISerialPortWrapper serialPort = null;
 
             if (String.IsNullOrEmpty(UserSettings.ComPort))
@@ -187,16 +197,17 @@ namespace adrilight
                         if (openedComPort != UserSettings.ComPort)
                         {
                             serialPort?.Close();
-                            
-                            serialPort = UserSettings.ComPort!= "Fake Port" 
-                                ? (ISerialPortWrapper) new WrappedSerialPort(new SerialPort(UserSettings.ComPort, baudRate)) 
+
+                            serialPort = UserSettings.ComPort != "Fake Port"
+                                ? (ISerialPortWrapper)new WrappedSerialPort(new SerialPort(UserSettings.ComPort, baudRate))
                                 : new FakeSerialPort();
 
                             try
                             {
                                 serialPort.Open();
                             }
-                            catch {
+                            catch
+                            {
                                 // useless UnauthorizedAccessException 
                             }
 
@@ -226,9 +237,9 @@ namespace adrilight
                         //ws2812b LEDs need 30 µs = 0.030 ms for each led to set its color so there is a lower minimum to the allowed refresh rate
                         //receiving over serial takes it time as well and the arduino does both tasks in sequence
                         //+1 ms extra safe zone
-                        var fastLedTime = (streamLength - _messagePreamble.Length - _messagePostamble.Length) /3.0*0.030d;
-                        var serialTransferTime = streamLength * 10.0*1000.0/ baudRate;
-                        var minTimespan = (int) (fastLedTime + serialTransferTime) + 1;
+                        var fastLedTime = (streamLength - _messagePreamble.Length - _messagePostamble.Length) / 3.0 * 0.030d;
+                        var serialTransferTime = streamLength * 10.0 * 1000.0 / baudRate;
+                        var minTimespan = (int)(fastLedTime + serialTransferTime) + 1;
 
                         Thread.Sleep(minTimespan);
                     }
